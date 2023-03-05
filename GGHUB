@@ -430,6 +430,34 @@ Section:NewToggle("Anti-Local commands", "Disable commands like ;crash", functio
 	end
 end)
 
+Section:NewTextBox("banish a player", "banish user", function(txt)
+	local target = findPlayer(txt)
+
+	if target ~= nil then
+		local s,e = pcall(function()
+			local args = {
+				[1] = ";apparate "..findPlayer(txt).Name.." 5680667182"
+			}
+
+			game:GetService("ReplicatedStorage").HDAdminClient.Signals.RequestCommand:InvokeServer(unpack(args))
+		end)
+		if e then
+			game.StarterGui:SetCore("SendNotification",{
+				Title = "error",
+				Text = e,
+				Duration = 6
+			})
+
+		end
+	else
+		game.StarterGui:SetCore("SendNotification",{
+			Title = "error",
+			Text = "Player not found or player died!",
+			Duration = 6
+		})
+	end
+end)
+
 Section:NewTextBox("kick a player", "attempt to kick user", function(txt)
 	local target = findPlayer(txt)
 
@@ -577,6 +605,14 @@ end)
 Section:NewButton("kick nonfriends", "kick nonfriends", function()
 	local args = {
 		[1] = ";crash nonfriends"
+	}
+
+	game:GetService("ReplicatedStorage").HDAdminClient.Signals.RequestCommand:InvokeServer(unpack(args))
+end)
+
+Section:NewButton("banish nonfriends", "banish nonfriends", function()
+	local args = {
+		[1] = ";apparate nonfriends 5680667182"
 	}
 
 	game:GetService("ReplicatedStorage").HDAdminClient.Signals.RequestCommand:InvokeServer(unpack(args))
