@@ -109,6 +109,17 @@ local Toggle = Tab:CreateToggle({
 	end,
 })
 
+local antialtEnabled = false
+
+local Toggle = Tab:CreateToggle({
+	Name = "AntiAlt",
+	CurrentValue = false,
+	Flag = "AntiAlt", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+	Callback = function(Value)
+		antialtEnabled = Value
+	end,
+})
+
 local Toggle = Tab:CreateToggle({
 	Name = "AntiDeath",
 	CurrentValue = false,
@@ -120,7 +131,7 @@ local Toggle = Tab:CreateToggle({
 			bindrs("AntiDeath",function()
 				if tick() - btick >= 0.2 then
 					btick = tick()
-					if hum:GetState() == Enum.HumanoidStateType.Dead then
+					if hum:GetState() == Enum.HumanoidStateType.Dead or hum.Health == 0 then
 						sendCommand(";re me")
 					end
 				end
@@ -337,6 +348,16 @@ game.Players.PlayerAdded:Connect(function(targetplr)
 		
 		sendCommand(";crash "..targetplr.Name)
 		notif("Crashed a crash banned player.")
+	end
+	
+	if antialtEnabled then
+		if targetplr.AccountAge <= 10 then
+			sendCommand(";crash "..targetplr.Name)
+			sendCommand(";sh Alt blocked")
+			notif("[ALT] "..targetplr.Name.."'s account is "..targetplr.AccountAge.." days old.")
+		else
+			notif("[SAFE] [JOIN LOG] "..targetplr.Name.."'s account is "..targetplr.AccountAge.." days old.")
+		end
 	end
 end)
 
