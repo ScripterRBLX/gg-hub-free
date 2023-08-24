@@ -360,17 +360,14 @@ if Rayfield:GetFromConfig("autocrash") then
 end
 
 while task.wait() do
-	plr = game.Players.LocalPlayer
-	char = plr.Character
-	hrp = char:WaitForChild("HumanoidRootPart")
-	hum = char.Humanoid
-	
-	if antimuteEnabled then
-		game.StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat,true)
-	end
-	
-	if Rayfield:GetFromConfig("autocrash") then
-		autocrash = Rayfield:GetFromConfig("autocrash")
-		print(Rayfield:GetFromConfig("autocrash"))
-	end
+	local s,e = pcall(function()
+		plr = game.Players.LocalPlayer
+		char = plr.Character
+		hrp = char:WaitForChild("HumanoidRootPart")
+		hum = char:WaitForChild("Humanoid")
+
+		if antimuteEnabled then
+			game.StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat,true)
+		end
+	end)
 end
