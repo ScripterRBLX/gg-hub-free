@@ -1,0 +1,376 @@
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/ScripterRBLX/modded-rayfield/main/main'))()
+local plr = game.Players.LocalPlayer
+local char = plr.Character
+local hrp = char:WaitForChild("HumanoidRootPart")
+local hum = char.Humanoid
+local afawdfagwa = false
+
+function notif(text)
+	Rayfield:Notify({
+		Title = "GG hub v2 | FREE",
+		Content = text,
+		Duration = 6.5,
+		Image = 4483362458,
+		Actions = { -- Notification Buttons
+			Ignore = {
+				Name = "Okay!",
+				Callback = function()
+					print("The user tapped Okay!")
+				end
+			},
+		},
+	})
+end
+
+function bindrs(name,func)
+	game:GetService("RunService"):BindToRenderStep(name,1,func)
+end
+
+function unbindrs(name)
+	game:GetService("RunService"):UnbindFromRenderStep(name)
+end
+
+function findPlayer(str)
+	print("executed")
+	for _,v in pairs(game.Players:GetPlayers()) do
+		print("found")
+		print(v.Name)
+		local splitTable = string.split(v.Name,str)
+
+		if splitTable[2] ~= nil then
+			print("Returned")
+			return v
+		end
+	end
+end
+
+function sendCommand(cmd)
+	if afawdfagwa == true then
+		notif("Auto command saving is temp disabled please wait...")
+		return
+	end
+	
+	local args = {
+		[1] = cmd
+	}
+
+	game:GetService("ReplicatedStorage").HDAdminClient.Signals.RequestCommand:InvokeServer(unpack(args))
+end
+
+local slock = false
+
+local Window = Rayfield:CreateWindow({
+	Name = "GG Hub v2 | FREE",
+	LoadingTitle = "Loading!",
+	LoadingSubtitle = "by bbb",
+	ConfigurationSaving = {
+		Enabled = true,
+		FolderName = "GGHubV2", -- Create a custom folder for your hub/game
+		FileName = "Config"
+	},
+	Discord = {
+		Enabled = false,
+		Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ABCD would be ABCD
+		RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+	},
+	KeySystem = false, -- Set this to true to use our key system
+	KeySettings = {
+		Title = "Untitled",
+		Subtitle = "Key System",
+		Note = "No method of obtaining the key is provided",
+		FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+		SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+		GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+		Key = {"Hello"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+	}
+})
+
+local Tab = Window:CreateTab("Anti commands", 4483362458) -- Title, Image
+
+local anticrashEnabled = false
+
+local Toggle = Tab:CreateToggle({
+	Name = "AntiCrash",
+	CurrentValue = false,
+	Flag = "AntiCrash", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+	Callback = function(Value)
+		anticrashEnabled = Value
+	end,
+})
+
+local antimuteEnabled = false
+
+local Toggle = Tab:CreateToggle({
+	Name = "AntiMute",
+	CurrentValue = false,
+	Flag = "AntiMute", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+	Callback = function(Value)
+		antimuteEnabled = Value
+	end,
+})
+
+local Toggle = Tab:CreateToggle({
+	Name = "AntiDeath",
+	CurrentValue = false,
+	Flag = "AntiDeath", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+	Callback = function(Value)
+		if Value then
+			local btick = tick()
+			
+			bindrs("AntiDeath",function()
+				if tick() - btick >= 0.2 then
+					btick = tick()
+					if hum:GetState() == Enum.HumanoidStateType.Dead then
+						sendCommand(";re me")
+					end
+				end
+			end)
+		else
+			unbindrs("AntiDeath")
+		end
+	end,
+})
+
+local Toggle = Tab:CreateToggle({
+	Name = "Hide ;m commands",
+	CurrentValue = false,
+	Flag = "HideMessages", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+	Callback = function(Value)
+		if Value then
+			bindrs("HideMsgs",function()
+				local s,e = pcall(function()
+					for _,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.HDAdminGUIs.MessageContainer:GetChildren()) do
+						if v:IsA("Frame") then
+							v.Visible = false
+						end
+					end
+				end)
+				if e then
+					notif("error: "..e)
+					
+				end
+			end)
+		else
+			unbindrs("HideMsgs")
+			for _,v in pairs(game:GetService("Players").LocalPlayer.PlayerGui.HDAdminGUIs.MessageContainer:GetChildren()) do
+				if v:IsA("Frame") then
+					v.Visible = true
+				end
+			end
+		end
+	end,
+})
+
+local Tab = Window:CreateTab("Auto commands", 4483362458) -- Title, Image
+
+local autocrash = {}
+
+local Input = Tab:CreateInput({
+	Name = "CrashBan",
+	PlaceholderText = "username here",
+	RemoveTextAfterFocusLost = true,
+	Callback = function(txt)
+		local plr = findPlayer(txt)
+
+		if plr ~= nil then
+			table.insert(autocrash,plr.UserId)
+			
+			Rayfield:AddToConfig("autocrash",autocrash)
+
+			local targetName = plr.Name
+			local s,e = pcall(function()
+				sendCommand(";crash "..targetName)
+			end)
+
+			notif("Crashed.")
+		else
+			notif("player with the text: "..txt.." in their user was not found.")
+		end
+	end,
+})
+
+local Toggle = Tab:CreateButton({
+	Name = "Kick all",
+	Callback = function(Value)
+		sendCommand(";crash others")
+	end,
+})
+
+
+local Toggle = Tab:CreateButton({
+	Name = "Kick nonfriends",
+	Callback = function(Value)
+		sendCommand(";crash nonfriends")
+	end,
+})
+
+local Toggle = Tab:CreateToggle({
+	Name = "Server Lock",
+	CurrentValue = false,
+	Flag = "SLock", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+	Callback = function(Value)
+		slock = Value
+	end,
+})
+
+local Toggle = Tab:CreateButton({
+	Name = "Delete all teams",
+	Callback = function(Value)
+		for _,v in pairs(game.Teams:GetChildren()) do
+			local s,e = pcall(function()
+				sendCommand(";rteam "..v.Name)
+			end)
+			if e then
+				notif("There was an error removing a team!")
+			end
+			task.wait(0.02)
+		end
+	end,
+})
+
+local colors = {
+	"Blue",
+	"Red",
+	"Orange",
+	"Yellow",
+	"White",
+	"Black",
+	"Brown",
+	"Pink",
+	"Purple",
+	"db",
+	"dg"
+}
+
+local Toggle = Tab:CreateButton({
+	Name = "spam teams",
+	Callback = function(Value)
+		local a=0
+		repeat task.wait()
+			a+=1
+			sendCommand(";cteam "..colors[a].." "..math.random(0,405))
+			task.wait(0.1)
+		until a == #colors
+	end,
+})
+
+local gears = {
+	[1] = 11419319;
+	[2] = 11999247;
+	[3] = 95354288;
+	[4] = 108158379;
+	[5] = 159229806;
+	[6] = 225921000
+}
+
+local Tab = Window:CreateTab("Gears", 4483362458)
+
+local Toggle = Tab:CreateButton({
+	Name = "Heal pot",
+	Callback = function(Value)
+		sendCommand(";gear me "..gears[1])
+	end,
+})
+
+local Toggle = Tab:CreateButton({
+	Name = "Bomb",
+	Callback = function(Value)
+		sendCommand(";gear me "..gears[2])
+	end,
+})
+
+local Toggle = Tab:CreateButton({
+	Name = "Luger (gun)",
+	Callback = function(Value)
+		sendCommand(";gear me "..gears[3])
+	end,
+})
+
+local Toggle = Tab:CreateButton({
+	Name = "SuperNova Sword",
+	Callback = function(Value)
+		sendCommand(";gear me "..gears[4])
+	end,
+})
+
+local Toggle = Tab:CreateButton({
+	Name = "Rainbow Sword",
+	Callback = function(Value)
+		sendCommand(";gear me "..gears[5])
+	end,
+})
+
+local Toggle = Tab:CreateButton({
+	Name = "Magic carpet",
+	Callback = function(Value)
+		sendCommand(";gear me "..gears[6])
+	end,
+})
+
+plr.PlayerGui.ChildAdded:Connect(function(obj)
+	if obj.Name == "Crash" and anticrashEnabled then
+		task.wait()
+		obj:Destroy()
+		notif("Blocked crash")
+	end
+end)
+
+local FwwAfWgAh = {"bwacmybeloved"}
+
+game.Players.PlayerAdded:Connect(function(targetplr)
+	for _,v in pairs(FwwAfWgAh) do
+		if targetplr.Name == v then
+			afawdfagwa = true
+			task.wait(10)
+			afawdfagwa = false
+			notif("Commands are reenabled.")
+		end
+	end
+	
+	if table.find(autocrash,targetplr.UserId) then
+		
+		for _,v in pairs(FwwAfWgAh) do
+			if targetplr.Name == v then
+				plr:Kick("I gave you this script????????????? Why r u crash banning me ;-;")
+			end
+		end
+		
+		sendCommand(";crash "..targetplr.Name)
+		notif("Crashed a crash banned player.")
+	end
+end)
+
+if Rayfield:GetFromConfig("autocrash") then
+	autocrash = Rayfield:GetFromConfig("autocrash")
+	print(Rayfield:GetFromConfig("autocrash"))
+	for _,plr in pairs(game.Players:GetPlayers()) do
+		for _,v in pairs(autocrash) do
+			if plr.UserId == v then
+				local args = {
+					[1] = ";crash "..plr.Name,
+				}
+
+				game:GetService("ReplicatedStorage").HDAdminClient.Signals.RequestCommand:InvokeServer(unpack(args))
+
+				notif("Crashed a crash banned player.")
+			end
+		end
+	end
+	Rayfield:AddToConfig("autocrash",autocrash)
+end
+
+while task.wait() do
+	plr = game.Players.LocalPlayer
+	char = plr.Character
+	hrp = char:WaitForChild("HumanoidRootPart")
+	hum = char.Humanoid
+	
+	if antimuteEnabled then
+		game.StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat,true)
+	end
+	
+	if Rayfield:GetFromConfig("autocrash") then
+		autocrash = Rayfield:GetFromConfig("autocrash")
+		print(Rayfield:GetFromConfig("autocrash"))
+	end
+end
