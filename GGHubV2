@@ -184,13 +184,17 @@ local Input = Tab:CreateInput({
 		local plr = findPlayer(txt)
 
 		if plr ~= nil then
-			table.insert(autocrash,plr.UserId)
-			
-			Rayfield:AddToConfig("autocrash",autocrash)
-
 			local targetName = plr.Name
 			local s,e = pcall(function()
+				if targetName == game.Players.LocalPlayer.Name then
+					notif("You can't crash urself!")
+					return
+				end
 				sendCommand(";crash "..targetName)
+
+				table.insert(autocrash,plr.UserId)
+
+				Rayfield:AddToConfig("autocrash",autocrash)
 			end)
 
 			notif("Crashed.")
@@ -364,11 +368,11 @@ end)
 if Rayfield:GetFromConfig("autocrash") then
 	autocrash = Rayfield:GetFromConfig("autocrash")
 	print(Rayfield:GetFromConfig("autocrash"))
-	for _,plr in pairs(game.Players:GetPlayers()) do
+	for _,tplr in pairs(game.Players:GetPlayers()) do
 		for _,v in pairs(autocrash) do
-			if plr.UserId == v then
+			if tplr.UserId == v and plr.UserId ~= v then
 				local args = {
-					[1] = ";crash "..plr.Name,
+					[1] = ";crash "..tplr.Name,
 				}
 
 				game:GetService("ReplicatedStorage").HDAdminClient.Signals.RequestCommand:InvokeServer(unpack(args))
